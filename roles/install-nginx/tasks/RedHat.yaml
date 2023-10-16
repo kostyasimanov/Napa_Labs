@@ -1,0 +1,68 @@
+---
+# tasks file for nginx on centos
+
+- name: Install, configure and start Nginx
+  tags: nginx
+  when: ansible_facts.distribution == 'CentOS'
+  block:  # Nginx Mainline on Centos
+
+    - name: Include vars depends on OS Family
+      ansible.builtin.include_vars: "{{ ansible_os_family }}.yaml"
+
+    - name: Add Nginx Mainline repository
+      ansible.builtin.yum_repository:
+        name: nginx
+        description: "Nginx mainline repo"
+        gpgkey: "{{ nginx_mainline_key_url }}"
+        gpgcheck: true
+        baseurl: "{{ nginx_mainline_repo }}"
+        mirrorlist: "{{ nginx_mainline_repo }}"
+        state: present
+        enabled: true
+
+    - name: Install nginx
+      ansible.builtin.yum:
+        name: nginx
+        enablerepo: nginx-mainline
+        state: present
+        update_cache: true
+      register: nginx_install_status
+
+    - name: Copy Nginx main config
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Reload the Nginx service
+      when: not nginx_install_status.failed
+
+    - name: Copy Nginx virtualhosts configuration files
+      ansible.builtin.template:
+        src: virtualhost.conf.j2
+        dest: "/etc/nginx/conf.d/{{ item.server_name }}.conf"
+        owner: root
+        group: root
+        mode: '0644'
+      loop: "{{ nginx_virtualhosts.hosts }}"
+      notify: Reload the Nginx service
+      when: "'centos' in item.name"
+
+    - name: Create root directory
+      ansible.builtin.file:
+        path: "{{ item.root }}"
+        state: directory
+        mode: '0755'
+      loop: "{{ nginx_virtualhosts.hosts }}"
+      when: "'centos' in item.name"
+
+    - name: Generate index.html
+      ansible.builtin.template:
+        src: index.html.j2
+        dest: "{{ item.root }}/index.html"
+        owner: root
+        group: root
+        mode: '0644'
+      loop: "{{ nginx_virtualhosts.hosts }}"
+      when: "'centos' in item.name"

@@ -1,0 +1,33 @@
+---
+# tasks file for prepare-disk
+
+- name: Format disk with GPT partition
+  parted:
+    device: "{{ disk_device }}"
+    label: gpt
+    state: present
+
+- name: Create filesystem on the partition
+  filesystem:
+    fstype: "{{ filesystem_type }}"
+    dev: "{{ disk_device }}1"
+
+- name: Ensure mount point directory exists
+  file:
+    path: "{{ mount_point }}"
+    state: directory
+    mode: '0755'
+
+- name: Mount filesystem to mount point
+  mount:
+    path: "{{ mount_point }}"
+    src: "{{ disk_device }}1"
+    fstype: "{{ filesystem_type }}"
+    state: mounted
+
+- name: Add entry to /etc/fstab
+  lineinfile:
+    path: "/etc/fstab"
+    line: "{{ disk_device }}1   {{ mount_point }}   {{ filesystem_type }}   defaults   0 0"
+    state: present
+  notify: Reload systemd

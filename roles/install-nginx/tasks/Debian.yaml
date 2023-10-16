@@ -1,0 +1,75 @@
+---
+
+- name: Install, configure and start Nginx
+  tags: nginx
+  when: ansible_facts.distribution == 'Ubuntu'
+  block:  # Nginx Mainline on Ubuntu
+
+    - name: Include vars depends on OS Family
+      ansible.builtin.include_vars: "{{ ansible_os_family }}.yaml"
+
+    - name: Add Nginx Mainline repository key
+      ansible.builtin.apt_key:
+        url: "{{ nginx_mainline_key_url }}"
+      register: apt_key_result
+      until: apt_key_result is succeeded
+
+    - name: Add Nginx Mainline repository
+      ansible.builtin.apt_repository:
+        repo: "{{ nginx_mainline_repo }}"
+        state: present
+
+    - name: Install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+      register: nginx_install_status
+
+    - name: Copy Nginx main config
+      ansible.builtin.template:
+        src: nginx/nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Reload the Nginx service
+      when: not nginx_install_status.failed
+
+    - name: Creates Nginx virtualhosts directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0644'
+      loop:
+        - "{{ nginx_virtualhosts.available }}"
+        - "{{ nginx_virtualhosts.enabled }}"
+        # - "{{ nginx_virtualhosts.hosts | map(attribute='root') | list }}" # работает только с with_items | стоит попробовать loop с dict2items или flatten
+
+    - name: Create root directory
+      ansible.builtin.file:
+        path: "{{ item.root }}"
+        state: directory
+        mode: '0755'
+      loop: "{{ nginx_virtualhosts.hosts }}"
+
+    - name: Copy Nginx virtualhosts configuration files
+      ansible.builtin.template:
+        src: nginx/virtualhost.conf.j2
+        dest: "{{ nginx_virtualhosts.available }}/{{ item.server_name }}.conf"
+        owner: root
+        group: root
+        mode: '0644'
+      loop: "{{ nginx_virtualhosts.hosts }}"
+      notify: Reload the Nginx service
+
+    - name: Create link to the new configs to enable
+      ansible.builtin.file:
+        src: "{{ nginx_virtualhosts.available }}/{{ item.server_name }}.conf"
+        dest: "{{ nginx_virtualhosts.enabled }}/{{ item.server_name }}.conf"
+        state: link
+      loop: "{{ nginx_virtualhosts.hosts }}"
+      notify: Reload the Nginx service
+      register: nginx_enabled
+
+

@@ -1,0 +1,16 @@
+---
+
+- name: Configure Webserver
+  hosts: ngx-webserver
+  become: true 
+  vars_prompt:
+    - name: disk_device
+      prompt: "Enter disk device (/dev/sda for example)"
+      private: false
+    - name: filesystem_type
+      prompt: "Enter type of filesystem (ext4 for example)"
+      private: false
+
+  roles:
+    - prepare-disk
+    - install-nginx

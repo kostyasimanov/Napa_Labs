@@ -1,0 +1,11 @@
+[Unit]
+Description=Nginx
+After=network.target
+
+[Service]
+User={{ nginx_user }}
+ExecStart=/bin/nginx
+Environment="NGINX_CONF_DIR={{ nginx_conf_dir }}"
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>My test web page with meme :)</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f7f7f7;
+			margin: 0;
+			padding: 0;
+			line-height: 1.5;
+			color: #333;
+		}
+		
+		header {
+			background-color: #212121;
+			color: #fff;
+			padding: 20px;
+			text-align: center;
+		}
+		
+		h1 {
+			font-size: 3rem;
+			margin: 0;
+		}
+		
+		.container {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 20px;
+			background-color: #fff;
+			box-shadow: 0 2px 4px rgba(0,0,0,.1);
+			border-radius: 4px;
+			margin-top: 40px;
+		}
+		
+		p {
+			font-size: 1.2rem;
+			margin-bottom: 20px;
+		}
+		
+		a {
+			color: #1e88e5;
+			text-decoration: none;
+		}
+		
+		a:hover {
+			text-decoration: underline;
+		}
+		
+		.picture {
+			text-align: center;
+			margin-top: 40px;
+		}
+		
+		.picture img {
+			max-width: 100%;
+			border-radius: 4px;
+			box-shadow: 0 2px 4px rgba(0,0,0,.1);
+		}
+		
+	</style>
+</head>
+<body>
+	<header>
+		<h1>My test web page with meme :)</h1>
+	</header>
+	<div class="container">
+		<p>Just text to fill the page: Ansible is an open-source automation tool that helps in automating software provisioning, configuration management, and application deployment. One of its key features is the use of Jinja templates for creating dynamic configurations.</p>
+		<p>Jinja is a powerful and flexible template engine for Python. It provides a syntax that allows you to embed expressions, variables, and control structures in your templates. Ansible uses Jinja templates to dynamically generate configuration files based on variables and other parameters.</p>
+		<p>With Ansible and Jinja templates, you can create reusable and scalable automation workflows that can be customized for different environments and configurations.</p>
+		<p>Learn more about Ansible and Jinja templates on the <a href="https://docs.ansible.com/ansible/latest/user_guide/playbooks_templating.html">official Ansible documentation website</a>.</p>
+		<div class="picture">
+			<img src="https://preview.redd.it/d69y2ly7lnra1.jpg?width=960&crop=smart&auto=webp&v=enabled&s=875f01931ce258c8f79bed5441b63a24a666f437" alt="The junior showing...">
+		</div>
+
+		{% for key, value in ansible_default_ipv4.items() %} {% if key == 'address' %} IP address of this server is: {{ value }} {% endif %}{% endfor%}
+
+	</div>
+</body>
+</html>

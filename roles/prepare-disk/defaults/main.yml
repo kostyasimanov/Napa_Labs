@@ -1,0 +1,6 @@
+---
+# defaults file for prepare-disk
+
+disk_device: ""
+filesystem_type: "ext4"
+mount_point: "/data"

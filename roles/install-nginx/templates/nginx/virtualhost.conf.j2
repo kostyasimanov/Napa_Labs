@@ -1,0 +1,12 @@
+server {
+  listen {{ nginx_http_port }};
+  server_name {{ item.server_name }};
+
+  root {{ item.root }};
+
+  {{ virtualhosts_files | join (' ') }};
+
+  location / {
+    try_files $uri $uri/ index.html;
+  }
+}

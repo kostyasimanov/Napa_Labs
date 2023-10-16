@@ -1,0 +1,4 @@
+---
+# vars file for nginx
+nginx_mainline_repo: "http://nginx.org/packages/mainline/centos/$releasever/$basearch/"
+nginx_mainline_key_url: "http://nginx.org/keys/nginx_signing.key"
